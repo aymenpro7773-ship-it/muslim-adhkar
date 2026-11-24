@@ -26,3 +26,10 @@ flutter:
   assets:
     - assets/data/adhkar.json
     - assets/data/stories.json
+
+    dependencies:
+  flutter:
+    sdk: flutter
+  # ... (المكتبات الأخرى التي أضفناها)
+  audioplayers: ^6.0.0 # أضف هذا السطر الجديد
+
