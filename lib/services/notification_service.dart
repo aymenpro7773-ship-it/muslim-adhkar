@@ -64,8 +64,11 @@ class NotificationService {
       if (eligible.isNotEmpty) return eligible;
       return decoded.whereType>().toList();
     } catch (_) {
-      return [
-        {'category': 'ذكر منبثق', 'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ'}
+      return >[
+        <String, dynamic>{
+          'category': 'ذكر منبثق',
+          'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+        }
       ];
     }
   }
