@@ -65,7 +65,7 @@ class NotificationService {
       return decoded.whereType>().toList();
     } catch (_) {
       return [
-        {'title': 'ذكر منبثق', 'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ'}
+        {'category': 'ذكر منبثق', 'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ'}
       ];
     }
   }
@@ -73,7 +73,8 @@ class NotificationService {
   static Future<void> showInstantTestNotification() async {
     final list = await _loadEligibleAdhkar();
     final item = list[Random().nextInt(list.length)];
-    final String body = (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
+    final String body =
+        (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
     final String title = (item['category'] ?? 'ذكر منبثق').toString();
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -101,7 +102,9 @@ class NotificationService {
 
     final prefs = await SharedPreferences.getInstance();
     final bool generalEnabled = prefs.getBool('generalNotifications') ?? true;
-    if (!generalEnabled) return;
+    if (!generalEnabled) {
+      return;
+    }
 
     final bool periodicEnabled = prefs.getBool('periodicNotifications') ?? true;
     final int intervalMinutes = prefs.getInt('intervalMinutes') ?? 30;
@@ -118,8 +121,8 @@ class NotificationService {
     if (periodicEnabled && list.isNotEmpty) {
       const int maxSchedules = 24;
       for (int i = 1; i <= maxSchedules; i++) {
-        final scheduledTime =
-            tz.TZDateTime.now(tz.local).add(Duration(minutes: intervalMinutes * i));
+        final scheduledTime = tz.TZDateTime.now(tz.local)
+            .add(Duration(minutes: intervalMinutes * i));
         final item = list[random.nextInt(list.length)];
         final String title = (item['category'] ?? 'ذكر منبثق').toString();
         final String body = (item['text'] ?? '').toString();
@@ -202,4 +205,3 @@ class NotificationService {
     );
   }
 }
-
