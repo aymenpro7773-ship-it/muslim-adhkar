@@ -26,7 +26,7 @@ jobs:
           channel: 'stable'
 
       - name: Ensure Android project is supported
-        run: flutter create --platforms=android .
+        run: flutter create --platforms=android --project-name muslim_adhkar .
 
       - name: Install dependencies
         run: flutter pub get
