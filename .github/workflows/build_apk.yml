@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17' # تحديد الإصدار بدقة لحل المشكلة
+          java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -27,6 +27,12 @@ jobs:
 
       - name: Ensure Android project is supported
         run: flutter create --platforms=android --project-name muslim_adhkar .
+
+      - name: Update Kotlin version
+        run: |
+          sed -i 's/org.jetbrains.kotlin.android" version "[^"]*"/org.jetbrains.kotlin.android" version "1.9.24"/g' android/settings.gradle || true
+          sed -i "s/ext.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.24'/g" android/build.gradle || true
+          sed -i 's/ext.kotlin_version = "[^"]*"/ext.kotlin_version = "1.9.24"/g' android/build.gradle || true
 
       - name: Install dependencies
         run: flutter pub get
