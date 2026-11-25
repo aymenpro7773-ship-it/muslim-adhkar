@@ -1,4 +1,6 @@
-name: muslim_adhkar
+      - name: Ensure Android project is supported
+        run: flutter create --platforms=android --project-name muslim_adhkar .
+
 description: تطبيق الأذكار والقصص والمسبحة والإشعارات المنبثقة.
 publish_to: 'none'
 version: 1.0.0+1
