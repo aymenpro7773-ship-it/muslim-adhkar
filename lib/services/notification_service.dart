@@ -28,6 +28,15 @@ class NotificationService {
     playSound: true,
   );
 
+  static List> _defaultFallbackAdhkar() {
+    return >[
+      <String, dynamic>{
+        'category': 'ذكر منبثق',
+        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+      },
+    ];
+  }
+
   static Future<void> init() async {
     tz.initializeTimeZones();
     try {
@@ -54,24 +63,20 @@ class NotificationService {
   }
 
   static Future<List>> _loadEligibleAdhkar() async {
-    final List> fallback = [
-      {
-        'category': 'ذكر منبثق',
-        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
-      },
-    ];
-
     try {
       final String raw = await rootBundle.loadString('assets/data/adhkar.json');
       final dynamic decoded = json.decode(raw);
-      if (decoded is! List) return fallback;
+      if (decoded is! List) {
+        return _defaultFallbackAdhkar();
+      }
 
-      final List> allMaps = [];
-      final List> eligibleMaps = [];
+      final List> allMaps = >[];
+      final List> eligibleMaps = >[];
 
-      for (final item in decoded) {
+      for (final dynamic item in decoded) {
         if (item is Map) {
-          final Map<String, dynamic> converted = Map<String, dynamic>.from(item);
+          final Map<String, dynamic> converted =
+              Map<String, dynamic>.from(item);
           allMaps.add(converted);
           if (converted['popup_eligible'] == true) {
             eligibleMaps.add(converted);
@@ -79,17 +84,21 @@ class NotificationService {
         }
       }
 
-      if (eligibleMaps.isNotEmpty) return eligibleMaps;
-      if (allMaps.isNotEmpty) return allMaps;
-      return fallback;
+      if (eligibleMaps.isNotEmpty) {
+        return eligibleMaps;
+      }
+      if (allMaps.isNotEmpty) {
+        return allMaps;
+      }
+      return _defaultFallbackAdhkar();
     } catch (_) {
-      return fallback;
+      return _defaultFallbackAdhkar();
     }
   }
 
   static Future<void> showInstantTestNotification() async {
-    final list = await _loadEligibleAdhkar();
-    final item = list[Random().nextInt(list.length)];
+    final List> list = await _loadEligibleAdhkar();
+    final Map<String, dynamic> item = list[Random().nextInt(list.length)];
     final String body =
         (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
     final String title = (item['category'] ?? 'ذكر منبثق').toString();
@@ -117,7 +126,7 @@ class NotificationService {
   static Future<void> rescheduleAll() async {
     await _notificationsPlugin.cancelAll();
 
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     final bool generalEnabled = prefs.getBool('generalNotifications') ?? true;
     if (!generalEnabled) {
       return;
@@ -132,15 +141,15 @@ class NotificationService {
     final int eveningHour = prefs.getInt('eveningHour') ?? 17;
     final int eveningMinute = prefs.getInt('eveningMinute') ?? 0;
 
-    final list = await _loadEligibleAdhkar();
-    final random = Random();
+    final List> list = await _loadEligibleAdhkar();
+    final Random random = Random();
 
     if (periodicEnabled && list.isNotEmpty) {
       const int maxSchedules = 24;
       for (int i = 1; i <= maxSchedules; i++) {
-        final scheduledTime = tz.TZDateTime.now(tz.local)
+        final tz.TZDateTime scheduledTime = tz.TZDateTime.now(tz.local)
             .add(Duration(minutes: intervalMinutes * i));
-        final item = list[random.nextInt(list.length)];
+        final Map<String, dynamic> item = list[random.nextInt(list.length)];
         final String title = (item['category'] ?? 'ذكر منبثق').toString();
         final String body = (item['text'] ?? '').toString();
         if (body.isEmpty) continue;
@@ -194,8 +203,8 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduled =
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduled =
         tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
