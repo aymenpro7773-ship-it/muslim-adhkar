@@ -54,22 +54,36 @@ class NotificationService {
   }
 
   static Future<List>> _loadEligibleAdhkar() async {
+    final List> fallback = [
+      {
+        'category': 'ذكر منبثق',
+        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+      },
+    ];
+
     try {
-      final raw = await rootBundle.loadString('assets/data/adhkar.json');
-      final List<dynamic> decoded = json.decode(raw);
-      final eligible = decoded
-          .whereType>()
-          .where((item) => item['popup_eligible'] == true)
-          .toList();
-      if (eligible.isNotEmpty) return eligible;
-      return decoded.whereType>().toList();
-    } catch (_) {
-      return >[
-        <String, dynamic>{
-          'category': 'ذكر منبثق',
-          'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+      final String raw = await rootBundle.loadString('assets/data/adhkar.json');
+      final dynamic decoded = json.decode(raw);
+      if (decoded is! List) return fallback;
+
+      final List> allMaps = [];
+      final List> eligibleMaps = [];
+
+      for (final item in decoded) {
+        if (item is Map) {
+          final Map<String, dynamic> converted = Map<String, dynamic>.from(item);
+          allMaps.add(converted);
+          if (converted['popup_eligible'] == true) {
+            eligibleMaps.add(converted);
+          }
         }
-      ];
+      }
+
+      if (eligibleMaps.isNotEmpty) return eligibleMaps;
+      if (allMaps.isNotEmpty) return allMaps;
+      return fallback;
+    } catch (_) {
+      return fallback;
     }
   }
 
