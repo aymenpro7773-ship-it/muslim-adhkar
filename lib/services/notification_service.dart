@@ -28,14 +28,6 @@ class NotificationService {
     playSound: true,
   );
 
-  static List> _defaultFallbackAdhkar() {
-    final item = <String, dynamic>{
-      'category': 'ذكر منبثق',
-      'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
-    };
-    return [item];
-  }
-
   static Future<void> init() async {
     tz.initializeTimeZones();
     try {
@@ -62,7 +54,13 @@ class NotificationService {
   }
 
   static Future<List>> _loadEligibleAdhkar() async {
-    final fallback = _defaultFallbackAdhkar();
+    final fallback = >[
+      <String, dynamic>{
+        'category': 'ذكر منبثق',
+        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+      },
+    ];
+
     try {
       final raw = await rootBundle.loadString('assets/data/adhkar.json');
       final decoded = json.decode(raw);
@@ -70,17 +68,18 @@ class NotificationService {
         return fallback;
       }
 
-      final allMaps = _defaultFallbackAdhkar()..clear();
-      final eligibleMaps = _defaultFallbackAdhkar()..clear();
+      final allMaps = >[];
+      final eligibleMaps = >[];
 
       for (final item in decoded) {
         if (item is Map) {
-          final converted = <String, dynamic>{};
-          item.forEach((key, value) {
-            converted[key.toString()] = value;
-          });
+          final converted = <String, dynamic>{
+            'category': item['category'],
+            'text': item['text'],
+            'popup_eligible': item['popup_eligible'],
+          };
           allMaps.add(converted);
-          if (converted['popup_eligible'] == true) {
+          if (item['popup_eligible'] == true) {
             eligibleMaps.add(converted);
           }
         }
