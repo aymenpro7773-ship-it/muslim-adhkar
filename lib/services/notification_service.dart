@@ -53,9 +53,9 @@ class NotificationService {
     await androidPlugin?.createNotificationChannel(_dailyChannel);
   }
 
-  static Future<List>> _loadEligibleAdhkar() async {
-    final fallback = >[
-      <String, dynamic>{
+  static Future _loadEligibleAdhkar() async {
+    final fallback = [
+      {
         'category': 'ذكر منبثق',
         'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
       },
@@ -68,12 +68,12 @@ class NotificationService {
         return fallback;
       }
 
-      final allMaps = >[];
-      final eligibleMaps = >[];
+      final allMaps = [fallback.first]..clear();
+      final eligibleMaps = [fallback.first]..clear();
 
       for (final item in decoded) {
         if (item is Map) {
-          final converted = <String, dynamic>{
+          final converted = {
             'category': item['category'],
             'text': item['text'],
             'popup_eligible': item['popup_eligible'],
