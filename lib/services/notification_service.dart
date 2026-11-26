@@ -29,8 +29,8 @@ class NotificationService {
   );
 
   static List> _defaultFallbackAdhkar() {
-    return >[
-      <String, dynamic>{
+    return [
+      {
         'category': 'ذكر منبثق',
         'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
       },
@@ -63,20 +63,20 @@ class NotificationService {
   }
 
   static Future<List>> _loadEligibleAdhkar() async {
+    final fallback = _defaultFallbackAdhkar();
     try {
-      final String raw = await rootBundle.loadString('assets/data/adhkar.json');
-      final dynamic decoded = json.decode(raw);
+      final raw = await rootBundle.loadString('assets/data/adhkar.json');
+      final decoded = json.decode(raw);
       if (decoded is! List) {
-        return _defaultFallbackAdhkar();
+        return fallback;
       }
 
-      final List> allMaps = >[];
-      final List> eligibleMaps = >[];
+      final allMaps = >[];
+      final eligibleMaps = >[];
 
-      for (final dynamic item in decoded) {
+      for (final item in decoded) {
         if (item is Map) {
-          final Map<String, dynamic> converted =
-              Map<String, dynamic>.from(item);
+          final converted = Map<String, dynamic>.from(item);
           allMaps.add(converted);
           if (converted['popup_eligible'] == true) {
             eligibleMaps.add(converted);
@@ -90,15 +90,15 @@ class NotificationService {
       if (allMaps.isNotEmpty) {
         return allMaps;
       }
-      return _defaultFallbackAdhkar();
+      return fallback;
     } catch (_) {
-      return _defaultFallbackAdhkar();
+      return fallback;
     }
   }
 
   static Future<void> showInstantTestNotification() async {
-    final List> list = await _loadEligibleAdhkar();
-    final Map<String, dynamic> item = list[Random().nextInt(list.length)];
+    final list = await _loadEligibleAdhkar();
+    final item = list[Random().nextInt(list.length)];
     final String body =
         (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
     final String title = (item['category'] ?? 'ذكر منبثق').toString();
@@ -126,7 +126,7 @@ class NotificationService {
   static Future<void> rescheduleAll() async {
     await _notificationsPlugin.cancelAll();
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final bool generalEnabled = prefs.getBool('generalNotifications') ?? true;
     if (!generalEnabled) {
       return;
@@ -141,15 +141,15 @@ class NotificationService {
     final int eveningHour = prefs.getInt('eveningHour') ?? 17;
     final int eveningMinute = prefs.getInt('eveningMinute') ?? 0;
 
-    final List> list = await _loadEligibleAdhkar();
-    final Random random = Random();
+    final list = await _loadEligibleAdhkar();
+    final random = Random();
 
     if (periodicEnabled && list.isNotEmpty) {
       const int maxSchedules = 24;
       for (int i = 1; i <= maxSchedules; i++) {
-        final tz.TZDateTime scheduledTime = tz.TZDateTime.now(tz.local)
+        final scheduledTime = tz.TZDateTime.now(tz.local)
             .add(Duration(minutes: intervalMinutes * i));
-        final Map<String, dynamic> item = list[random.nextInt(list.length)];
+        final item = list[random.nextInt(list.length)];
         final String title = (item['category'] ?? 'ذكر منبثق').toString();
         final String body = (item['text'] ?? '').toString();
         if (body.isEmpty) continue;
@@ -203,8 +203,8 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduled =
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled =
         tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
