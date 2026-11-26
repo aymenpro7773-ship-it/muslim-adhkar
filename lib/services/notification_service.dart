@@ -29,12 +29,11 @@ class NotificationService {
   );
 
   static List> _defaultFallbackAdhkar() {
-    return [
-      {
-        'category': 'ذكر منبثق',
-        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
-      },
-    ];
+    final item = <String, dynamic>{
+      'category': 'ذكر منبثق',
+      'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+    };
+    return [item];
   }
 
   static Future<void> init() async {
@@ -71,12 +70,15 @@ class NotificationService {
         return fallback;
       }
 
-      final allMaps = >[];
-      final eligibleMaps = >[];
+      final allMaps = _defaultFallbackAdhkar()..clear();
+      final eligibleMaps = _defaultFallbackAdhkar()..clear();
 
       for (final item in decoded) {
         if (item is Map) {
-          final converted = Map<String, dynamic>.from(item);
+          final converted = <String, dynamic>{};
+          item.forEach((key, value) {
+            converted[key.toString()] = value;
+          });
           allMaps.add(converted);
           if (converted['popup_eligible'] == true) {
             eligibleMaps.add(converted);
@@ -99,11 +101,10 @@ class NotificationService {
   static Future<void> showInstantTestNotification() async {
     final list = await _loadEligibleAdhkar();
     final item = list[Random().nextInt(list.length)];
-    final String body =
-        (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
-    final String title = (item['category'] ?? 'ذكر منبثق').toString();
+    final body = (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
+    final title = (item['category'] ?? 'ذكر منبثق').toString();
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const androidDetails = AndroidNotificationDetails(
       'adhkar_popup_channel',
       'الأذكار المنبثقة الدورية',
       channelDescription: 'تنبيهات الأذكار المنبثقة أعلى الشاشة',
@@ -112,8 +113,7 @@ class NotificationService {
       ticker: 'ذكر منبثق',
     );
 
-    const NotificationDetails details =
-        NotificationDetails(android: androidDetails);
+    const details = NotificationDetails(android: androidDetails);
 
     await _notificationsPlugin.show(
       999,
@@ -127,31 +127,31 @@ class NotificationService {
     await _notificationsPlugin.cancelAll();
 
     final prefs = await SharedPreferences.getInstance();
-    final bool generalEnabled = prefs.getBool('generalNotifications') ?? true;
+    final generalEnabled = prefs.getBool('generalNotifications') ?? true;
     if (!generalEnabled) {
       return;
     }
 
-    final bool periodicEnabled = prefs.getBool('periodicNotifications') ?? true;
-    final int intervalMinutes = prefs.getInt('intervalMinutes') ?? 30;
-    final bool morningEnabled = prefs.getBool('morningNotifications') ?? true;
-    final bool eveningEnabled = prefs.getBool('eveningNotifications') ?? true;
-    final int morningHour = prefs.getInt('morningHour') ?? 8;
-    final int morningMinute = prefs.getInt('morningMinute') ?? 0;
-    final int eveningHour = prefs.getInt('eveningHour') ?? 17;
-    final int eveningMinute = prefs.getInt('eveningMinute') ?? 0;
+    final periodicEnabled = prefs.getBool('periodicNotifications') ?? true;
+    final intervalMinutes = prefs.getInt('intervalMinutes') ?? 30;
+    final morningEnabled = prefs.getBool('morningNotifications') ?? true;
+    final eveningEnabled = prefs.getBool('eveningNotifications') ?? true;
+    final morningHour = prefs.getInt('morningHour') ?? 8;
+    final morningMinute = prefs.getInt('morningMinute') ?? 0;
+    final eveningHour = prefs.getInt('eveningHour') ?? 17;
+    final eveningMinute = prefs.getInt('eveningMinute') ?? 0;
 
     final list = await _loadEligibleAdhkar();
     final random = Random();
 
     if (periodicEnabled && list.isNotEmpty) {
-      const int maxSchedules = 24;
-      for (int i = 1; i <= maxSchedules; i++) {
+      const maxSchedules = 24;
+      for (var i = 1; i <= maxSchedules; i++) {
         final scheduledTime = tz.TZDateTime.now(tz.local)
             .add(Duration(minutes: intervalMinutes * i));
         final item = list[random.nextInt(list.length)];
-        final String title = (item['category'] ?? 'ذكر منبثق').toString();
-        final String body = (item['text'] ?? '').toString();
+        final title = (item['category'] ?? 'ذكر منبثق').toString();
+        final body = (item['text'] ?? '').toString();
         if (body.isEmpty) continue;
 
         await _notificationsPlugin.zonedSchedule(
