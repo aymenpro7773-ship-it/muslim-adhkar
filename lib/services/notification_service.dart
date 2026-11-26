@@ -58,6 +58,7 @@ class NotificationService {
       {
         'category': 'ذكر منبثق',
         'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
+        'popup_eligible': true,
       },
     ];
 
@@ -103,7 +104,7 @@ class NotificationService {
     final body = (item['text'] ?? 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ').toString();
     final title = (item['category'] ?? 'ذكر منبثق').toString();
 
-    const androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'adhkar_popup_channel',
       'الأذكار المنبثقة الدورية',
       channelDescription: 'تنبيهات الأذكار المنبثقة أعلى الشاشة',
@@ -112,7 +113,8 @@ class NotificationService {
       ticker: 'ذكر منبثق',
     );
 
-    const details = NotificationDetails(android: androidDetails);
+    const NotificationDetails details =
+        NotificationDetails(android: androidDetails);
 
     await _notificationsPlugin.show(
       999,
