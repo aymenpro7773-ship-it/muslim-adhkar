@@ -56,9 +56,9 @@ class NotificationService {
   static Future _loadEligibleAdhkar() async {
     final fallback = [
       {
-        'category': 'ذكر منبثق',
-        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',
-        'popup_eligible': true,
+        'category': 'ذكر منبثق' as Object?,
+        'text': 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ' as Object?,
+        'popup_eligible': true as Object?,
       },
     ];
 
@@ -69,15 +69,28 @@ class NotificationService {
         return fallback;
       }
 
-      final allMaps = [fallback.first]..clear();
-      final eligibleMaps = [fallback.first]..clear();
+      final allMaps = [
+        {
+          'category': '' as Object?,
+          'text': '' as Object?,
+          'popup_eligible': false as Object?,
+        }
+      ]..clear();
+
+      final eligibleMaps = [
+        {
+          'category': '' as Object?,
+          'text': '' as Object?,
+          'popup_eligible': false as Object?,
+        }
+      ]..clear();
 
       for (final item in decoded) {
         if (item is Map) {
           final converted = {
-            'category': item['category'],
-            'text': item['text'],
-            'popup_eligible': item['popup_eligible'],
+            'category': item['category'] as Object?,
+            'text': item['text'] as Object?,
+            'popup_eligible': item['popup_eligible'] as Object?,
           };
           allMaps.add(converted);
           if (item['popup_eligible'] == true) {
